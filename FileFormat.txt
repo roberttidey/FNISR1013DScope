@@ -1,0 +1,20 @@
+0-999 Header data
+1000 - 3999 CH1 data1
+4000 - 6999 CH2 data1
+7000 - 8499 CH1 data2
+8500 - 9999 CH2 data2
+10000 - 14999 seems to be just nulls in my captures so far.
+
+The header data
+CH1 vertical scale at 4 where 0-6 represents 5.0V,2.5V,1.0V,500mV,200mV,100mV,50mV/div
+CH2 vertical scale at 14 (same as CH1
+
+Time scale at 22 (repeated at 52 where 0 - 29 represents
+50S,20S,10S,5S,2S,1S,500mS,200mS,100mS,50mS,20mS,10ms,5mS,2mS,1mS,
+500uS,200uS,100uS,50uS,20uS,10uS,5uS,2uS,1uS,500nS,200nS,100nS,50nS,20nS,10nS
+
+Ch1 measurements at 208 - 255 (12 4byte fields)
+Ch2 measurements at 256 - 303 (12 4byte fields)
+
+dataBlock1 1500 2 byte fields (little endian) which represent the total captured values. Values range from 0 - 399 where level 200 represents 0 and 50 units represents the scale of the sensitivity.
+dataBlock2 750 2 byte fields (little endian ) which represent the displayed values values. Values are the Y co-ordinates from the top of the screen so they are inverted compared to the buffer values.
