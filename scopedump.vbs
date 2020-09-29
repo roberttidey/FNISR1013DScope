@@ -126,8 +126,8 @@ Const HDR_SCROLL = 24
 				LogDataBlock "CH2 Display", 8500, 1500
 			End If
 			If BLOCK1_VALS = 1 Then
-				LogDataVals "CH1 Values", 7000, 1500, 0
-				LogDataVals "CH2 Values", 8500, 1500, 1
+				LogDataVals "CH1 Values", 1000, 3000, 0
+				LogDataVals "CH2 Values", 4000, 3000, 1
 			End If
 			'LogDataBlock "End Data", 10000, 5000
 				
