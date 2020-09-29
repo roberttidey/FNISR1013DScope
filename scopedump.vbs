@@ -27,10 +27,29 @@ Const DEFAULTCOLSPERLINE	= 16
 Const FORMAT_SPACED			= 1
 Const FORMAT_ASCII			= 0
 
-Const SCALE_VOLTS = "5.0V,2.5V,1.0V,500mV,200mV,100mV,50mV"
-Const SCALE_TIME ="50S,20S,10S,5S,2S,1S,500mS,200mS,100mS,50mS,20mS,10mS,5mS,2mS,1mS,500uS,200uS,100uS,50uS,20uS,10uS,5uS,2uS,1uS,500nS,200nS,100nS,50nS,20nS,10nS,5nS,2nS,1nS"
+Const CHANNEL_VOLTS = "5.0V,2.5V,1.0V,500mV,200mV,100mV,50mV"
+Const CHANNEL_COUPLING = "DC,AC"
+Const CHANNEL_PROBE = "x1,x10,x100"
+Const TIMEBASE ="50S,20S,10S,5S,2S,1S,500mS,200mS,100mS,50mS,20mS,10mS,5mS,2mS,1mS,500uS,200uS,100uS,50uS,20uS,10uS,5uS,2uS,1uS,500nS,200nS,100nS,50nS,20nS,10nS,5nS,2nS,1nS"
 Const MEASURES ="Vpp,Vrms,Freq,Tim+,Tim-,Cycle,Vavg,Vmax,VMin,Vp,Duty+,Duty-"
+Const TRIGTYPE = "Auto,Single,Normal"
+Const TRIGEDGE = "Rising,Falling"
+Const SCROLL = "Fast,Slow"
+Const HDR_CHGAIN = 4
+Const HDR_CHPROBE = 10
+Const HDR_CHCOUPLING = 8
+Const HDR_TIMEBASE = 22
+COnst HDR_TRIGTYPE = 26
+Const HDR_TRIGEDGE = 28
+Const HDR_SCREENBRIGHT = 120
+Const HDR_GRIDBRIGHT = 122
+Const HDR_SCROLL = 24
 
+'Controls what is included in file
+Const HDR_HEX = 1
+Const BLOCK1_HEX = 1
+Const BLOCK2_HEX = 1
+Const BLOCK1_VALS = 1
 '******************************
 'Main Script Code goes here
 '******************************
@@ -85,13 +104,24 @@ Const MEASURES ="Vpp,Vrms,Freq,Tim+,Tim-,Cycle,Vavg,Vmax,VMin,Vp,Duty+,Duty-"
 			lFile.WriteLine  iFileName & " Size &H" & Hex(iSize) & "  " & Now()
 			
 			'Get and Dump the header
-			LogHdrBlock
-			
-			LogDataBlock "CH1 Data", 1000, 3000
-			LogDataBlock "CH2 Data", 4000, 3000
-			LogDataBlock "CH1 Ctrl", 7000, 1500
-			LogDataBlock "CH2 Ctrl", 8500, 1500
-			LogDataBlock "End Data", 10000, 5000
+			binAcc.SeekBinary(iFile) = 1
+			ReDim DataBlock(HDRSIZE)
+			Index = binAcc.ReadBytes(iFile, DataBlock)
+			If HDR_HEX = 1 Then LogHdrBlock
+			DecodeHdrBlock
+			If BLOCK1_HEX = 1 Then
+				LogDataBlock "CH1 Data", 1000, 3000
+				LogDataBlock "CH2 Data", 4000, 3000
+			End If
+			If BLOCK2_HEX = 1 Then
+				LogDataBlock "CH1 Display", 7000, 1500
+				LogDataBlock "CH2 Display", 8500, 1500
+			End If
+			If BLOCK1_VALS = 1 Then
+				LogDataVals "CH1 Values", 7000, 1500
+				LogDataVals "CH2 Values", 8500, 1500
+			End If
+			'LogDataBlock "End Data", 10000, 5000
 				
 			binAcc.CloseBinary() = iFile
 			lFile.Close
@@ -152,9 +182,18 @@ End Function
 Function DecodeHdrBlock()
 	Dim Index
 	
-	lFile.WriteLine "CH1 Volts:" & Split(SCALE_VOLTS,",")(DataBlock(5)) & "/div"
-	lFile.WriteLine "CH2 Volts:" & Split(SCALE_VOLTS,",")(DataBlock(15)) & "/div"
-	lFile.WriteLine "Time:" & Split(SCALE_TIME,",")(DataBlock(23)) & "/div"
+	lFile.WriteLine "CH1 Volts:" & Split(CHANNEL_VOLTS,",")(DataBlock(HDR_CHGAIN + 1)) & "/div"
+	lFile.WriteLine "CH1 Coupling:" & Split(CHANNEL_COUPLING,",")(DataBlock(HDR_CHCOUPLING + 1))
+	lFile.WriteLine "CH1 Probe:" & Split(CHANNEL_PROBE,",")(DataBlock(HDR_CHPROBE + 1))
+	lFile.WriteLine "CH2 Volts:" & Split(CHANNEL_VOLTS,",")(DataBlock(HDR_CHGAIN + 11)) & "/div"
+	lFile.WriteLine "CH2 Coupling:" & Split(CHANNEL_COUPLING,",")(DataBlock(HDR_CHCOUPLING + 11))
+	lFile.WriteLine "CH2 Probe:" & Split(CHANNEL_PROBE,",")(DataBlock(HDR_CHPROBE + 11))
+	lFile.WriteLine "TimeBase:" & Split(TIMEBASE,",")(DataBlock(HDR_TIMEBASE + 1))
+	lFile.WriteLine "TrigType:" & Split(TRIGTYPE,",")(DataBlock(HDR_TRIGTYPE + 1))
+	lFile.WriteLine "TrigEdge:" & Split(TRIGEDGE,",")(DataBlock(HDR_TRIGEDGE + 1))
+	lFile.WriteLine "ScreenBright:" & CStr(DataBlock(HDR_SCREENBRIGHT + 1))
+	lFile.WriteLine "GridBright:" & CStr(DataBlock(HDR_GRIDBRIGHT + 1))
+	lFile.WriteLine "ScrollSpeed:" & Split(SCROLL,",")(DataBlock(HDR_SCROLL + 1))
 
 	For Index = 0 to 11
 		lFile.WriteLine "Measure Ch1:" & Split(MEASURES,",")(Index) & " = " & getMeasure(1, Index)
@@ -214,11 +253,10 @@ Function LogHdrBlock()
 		lFile.WriteLine
 	End If
 	lFile.WriteLine
-	DecodeHdrBlock
 End Function
 
 '**********************************************************************
-'Routine to log a data block in Hex format, ColsPerLine entries per line
+'Routine to log a data block in Hex format, compressed to block similar values
 '**********************************************************************
 Function LogDataBlock(blockTitle, DataStart, DataSize)
 	Dim Index
@@ -251,6 +289,32 @@ Function LogDataBlock(blockTitle, DataStart, DataSize)
 	If blockCount > 1 Then
 		lFile.WriteLine Right("0000" & CStr(DataStart + blockIndex),4) & ":" & Right("0000" & CStr(blockCount),4) & ":" & Right("0000" & Hex(blockVal1),4)
 	End If
+End Function
+
+'**********************************************************************
+'Routine to log a data block in Values format
+'**********************************************************************
+Function LogDataVals(blockTitle, DataStart, DataSize)
+	Dim Index
+	Dim blockVal
+	
+	lFile.WriteLine blockTitle
+	binAcc.SeekBinary(iFile) = DataStart + 1
+	ReDim DataBlock(DataSize)
+	Index = binAcc.ReadBytes(iFile, DataBlock)
+	For Index = 0 To DataSize - 2 Step 2
+		blockVal = DataBlock(Index + 1) + 256 * DataBlock(Index + 0)
+		If Index Mod 20  = 0 Then
+			lFile.WriteLine
+			lFile.Write Right("0000" & CStr(Index / 2),4) & "," 
+		End If
+		lFile.Write CStr(blockVal - 200)
+		If Index Mod 20 <> 18 Then
+			lFile.Write ","
+		End If
+	Next
+	lFile.WriteLine
+	lFile.WriteLine
 End Function
 
 

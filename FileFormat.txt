@@ -9,9 +9,23 @@ The header data
 CH1 vertical scale at 4 where 0-6 represents 5.0V,2.5V,1.0V,500mV,200mV,100mV,50mV/div
 CH2 vertical scale at 14 (same as CH1
 
+CH1 coupling at 8 0 - 1 DC,AC
+CH2 coupling at 18 0 - 1 DC,AC
+
+CH1 Probe at 10 0 - 2 x1,x10,x100
+CH2 Probe at 20 0 - 2 x1,x10,x100
+
 Time scale at 22 (repeated at 52 where 0 - 29 represents
 50S,20S,10S,5S,2S,1S,500mS,200mS,100mS,50mS,20mS,10ms,5mS,2mS,1mS,
 500uS,200uS,100uS,50uS,20uS,10uS,5uS,2uS,1uS,500nS,200nS,100nS,50nS,20nS,10nS
+
+Trigger type at 26 0 - 2 Auto,Single,Normal
+Trigger edge at 28 0 - 1 RISING, FALLING
+
+Screen Brightness at 120 0-99
+Grid Brightness at 122 0-99
+
+Scroll speed at 24 0 - 1 Fast, Slow
 
 Ch1 measurements at 208 - 255 (12 4byte fields)
 Ch2 measurements at 256 - 303 (12 4byte fields)
