@@ -7,6 +7,6 @@ These are 15000 byte binary files containing, bufffer data, display data and set
 
 The aim is to produce a conversion tool that can make this available in a readable and computable form.
 
-The vbscript file screendump.vbs is an evolving script that is picking apart the wav file as the investigation proceeds.
+The vbscript file scopedump.vbs is an evolving script that is picking apart the wav file as the investigation proceeds.
 
 
