@@ -27,10 +27,19 @@ Const DEFAULTCOLSPERLINE	= 16
 Const FORMAT_SPACED			= 1
 Const FORMAT_ASCII			= 0
 
-Const CHANNEL_VOLTS = "5.0V,2.5V,1.0V,500mV,200mV,100mV,50mV"
+'Controls what is included in file
+'Set the HEX values to 1 to see the raw binary data in hex format as required 
+Const HDR_HEX = 0
+Const BLOCK1_HEX = 0
+Const BLOCK2_HEX = 0
+Const BLOCK1_VALS = 1
+'Set this to 1 if absolute voltage values wanted
+Const SCALE_VALUES = 1
+
+Const CHANNEL_VSCALE = "5.0:V,2.5:V,1.0:V,500:mV,200:mV,100:mV,50:mV"
 Const CHANNEL_COUPLING = "DC,AC"
-Const CHANNEL_PROBE = "x1,x10,x100"
-Const TIMEBASE ="50S,20S,10S,5S,2S,1S,500mS,200mS,100mS,50mS,20mS,10mS,5mS,2mS,1mS,500uS,200uS,100uS,50uS,20uS,10uS,5uS,2uS,1uS,500nS,200nS,100nS,50nS,20nS,10nS,5nS,2nS,1nS"
+Const CHANNEL_PROBE = "1,10,100"
+Const TIMEBASE_HSCALE ="50:S,20:S,10:S,5:S,2:S,1:S,500:mS,200:mS,100:mS,50:mS,20:mS,10:mS,5:mS,2:mS,1:mS,500:uS,200:uS,100:uS,50:uS,20:uS,10:uS,5:uS,2:uS,1:uS,500:nS,200:nS,100:nS,50:nS,20:nS,10:nS"
 Const MEASURES ="Vpp,Vrms,Freq,Tim+,Tim-,Cycle,Vavg,Vmax,VMin,Vp,Duty+,Duty-"
 Const TRIGTYPE = "Auto,Single,Normal"
 Const TRIGEDGE = "Rising,Falling"
@@ -45,11 +54,6 @@ Const HDR_SCREENBRIGHT = 120
 Const HDR_GRIDBRIGHT = 122
 Const HDR_SCROLL = 24
 
-'Controls what is included in file
-Const HDR_HEX = 1
-Const BLOCK1_HEX = 1
-Const BLOCK2_HEX = 1
-Const BLOCK1_VALS = 1
 '******************************
 'Main Script Code goes here
 '******************************
@@ -71,6 +75,10 @@ Const BLOCK1_VALS = 1
 	Dim WshShell
 	DIm ColsPerLine
 	Dim DataBlock()			'Holds Data Block for dumping
+	Dim vScale(2)
+	Dim vUnits(2)
+	Dim tScale
+	Dim tUnits
 	Dim Index
 	
 	Set fso = CreateObject("Scripting.FileSystemObject")
@@ -118,8 +126,8 @@ Const BLOCK1_VALS = 1
 				LogDataBlock "CH2 Display", 8500, 1500
 			End If
 			If BLOCK1_VALS = 1 Then
-				LogDataVals "CH1 Values", 7000, 1500
-				LogDataVals "CH2 Values", 8500, 1500
+				LogDataVals "CH1 Values", 7000, 1500, 0
+				LogDataVals "CH2 Values", 8500, 1500, 1
 			End If
 			'LogDataBlock "End Data", 10000, 5000
 				
@@ -181,14 +189,24 @@ End Function
 '**********************************************************************
 Function DecodeHdrBlock()
 	Dim Index
+	Dim scale
 	
-	lFile.WriteLine "CH1 Volts:" & Split(CHANNEL_VOLTS,",")(DataBlock(HDR_CHGAIN + 1)) & "/div"
+	scale = Split(CHANNEL_VSCALE,",")(DataBlock(HDR_CHGAIN + 1))
+	vScale(0) = Split(scale, vbCOLON)(0)
+	vUnits(0) = Split(scale, vbCOLON)(1)
+	scale = Split(CHANNEL_VSCALE,",")(DataBlock(HDR_CHGAIN + 11))
+	vScale(1) = Split(scale, vbCOLON)(0)
+	vUnits(1) = Split(scale, vbCOLON)(1)
+	scale = Split(TIMEBASE_HSCALE,",")(DataBlock(HDR_TIMEBASE + 1))
+	tScale = Split(scale, vbCOLON)(0)
+	tUnits = Split(scale, vbCOLON)(1)
+	lFile.WriteLine "CH1 Volts:" & vScale(0) & vUnits(0) & "/div"
 	lFile.WriteLine "CH1 Coupling:" & Split(CHANNEL_COUPLING,",")(DataBlock(HDR_CHCOUPLING + 1))
-	lFile.WriteLine "CH1 Probe:" & Split(CHANNEL_PROBE,",")(DataBlock(HDR_CHPROBE + 1))
-	lFile.WriteLine "CH2 Volts:" & Split(CHANNEL_VOLTS,",")(DataBlock(HDR_CHGAIN + 11)) & "/div"
+	lFile.WriteLine "CH1 Probe:x" & Split(CHANNEL_PROBE,",")(DataBlock(HDR_CHPROBE + 1))
+	lFile.WriteLine "CH1 Volts:" & vScale(1) & vUnits(1) & "/div"
 	lFile.WriteLine "CH2 Coupling:" & Split(CHANNEL_COUPLING,",")(DataBlock(HDR_CHCOUPLING + 11))
 	lFile.WriteLine "CH2 Probe:" & Split(CHANNEL_PROBE,",")(DataBlock(HDR_CHPROBE + 11))
-	lFile.WriteLine "TimeBase:" & Split(TIMEBASE,",")(DataBlock(HDR_TIMEBASE + 1))
+	lFile.WriteLine "TimeBase:" & tScale & tUnits &  "/div"
 	lFile.WriteLine "TrigType:" & Split(TRIGTYPE,",")(DataBlock(HDR_TRIGTYPE + 1))
 	lFile.WriteLine "TrigEdge:" & Split(TRIGEDGE,",")(DataBlock(HDR_TRIGEDGE + 1))
 	lFile.WriteLine "ScreenBright:" & CStr(DataBlock(HDR_SCREENBRIGHT + 1))
@@ -294,21 +312,26 @@ End Function
 '**********************************************************************
 'Routine to log a data block in Values format
 '**********************************************************************
-Function LogDataVals(blockTitle, DataStart, DataSize)
+Function LogDataVals(blockTitle, DataStart, DataSize, ch)
 	Dim Index
 	Dim blockVal
+	Dim vMult
+	DIm tMult
 	
-	lFile.WriteLine blockTitle
+	lFile.WriteLine blockTitle & " " & vScale(ch) & vUnits(ch) & "/div " & tScale & tUnits &  "/div"
+	lFile.Write "SampleNum,SampleTime,10 values"
 	binAcc.SeekBinary(iFile) = DataStart + 1
 	ReDim DataBlock(DataSize)
 	Index = binAcc.ReadBytes(iFile, DataBlock)
+	vMult = CSng(vScale(ch))
+	tMult = CSng(tScale)
 	For Index = 0 To DataSize - 2 Step 2
 		blockVal = DataBlock(Index + 1) + 256 * DataBlock(Index + 0)
 		If Index Mod 20  = 0 Then
 			lFile.WriteLine
-			lFile.Write Right("0000" & CStr(Index / 2),4) & "," 
+			lFile.Write Right("0000" & CStr(Index / 2),4) & "," & CStr(Index / 100 * tMult) & ","
 		End If
-		lFile.Write CStr(blockVal - 200)
+		lFile.Write CStr((blockVal - 200) * vMult / 50)
 		If Index Mod 20 <> 18 Then
 			lFile.Write ","
 		End If
