@@ -29,7 +29,7 @@ Const FORMAT_ASCII			= 0
 
 'Controls what is included in file
 'Set the HEX values to 1 to see the raw binary data in hex format as required 
-Const HDR_HEX = 0
+Const HDR_HEX = 1
 Const BLOCK1_HEX = 0
 Const BLOCK2_HEX = 0
 Const BLOCK1_VALS = 1
@@ -40,19 +40,23 @@ Const CHANNEL_VSCALE = "5.0:V,2.5:V,1.0:V,500:mV,200:mV,100:mV,50:mV"
 Const CHANNEL_COUPLING = "DC,AC"
 Const CHANNEL_PROBE = "1,10,100"
 Const TIMEBASE_HSCALE ="50:S,20:S,10:S,5:S,2:S,1:S,500:mS,200:mS,100:mS,50:mS,20:mS,10:mS,5:mS,2:mS,1:mS,500:uS,200:uS,100:uS,50:uS,20:uS,10:uS,5:uS,2:uS,1:uS,500:nS,200:nS,100:nS,50:nS,20:nS,10:nS"
-Const MEASURES ="Vpp,Vrms,Freq,Tim+,Tim-,Cycle,Vavg,Vmax,VMin,Vp,Duty+,Duty-"
+Const MEASURES = "Vpp,Vrms,Freq,Tim+,Tim-,Cycle,Vavg,Vmax,VMin,Vp,Duty+,Duty-"
 Const TRIGTYPE = "Auto,Single,Normal"
 Const TRIGEDGE = "Rising,Falling"
+Const TRIGCHANNEL = "CH1,CH2"
 Const SCROLL = "Fast,Slow"
+Const TRIG50 = "Off,On"
 Const HDR_CHGAIN = 4
 Const HDR_CHPROBE = 10
 Const HDR_CHCOUPLING = 8
 Const HDR_TIMEBASE = 22
 COnst HDR_TRIGTYPE = 26
 Const HDR_TRIGEDGE = 28
+Const HDR_TRIGCHANNEL = 30
 Const HDR_SCREENBRIGHT = 120
 Const HDR_GRIDBRIGHT = 122
 Const HDR_SCROLL = 24
+Const HDR_TRIG50 = 124
 
 '******************************
 'Main Script Code goes here
@@ -209,9 +213,11 @@ Function DecodeHdrBlock()
 	lFile.WriteLine "TimeBase:" & tScale & tUnits &  "/div"
 	lFile.WriteLine "TrigType:" & Split(TRIGTYPE,",")(DataBlock(HDR_TRIGTYPE + 1))
 	lFile.WriteLine "TrigEdge:" & Split(TRIGEDGE,",")(DataBlock(HDR_TRIGEDGE + 1))
+	lFile.WriteLine "TrigChannel:" & Split(TRIGCHANNEL,",")(DataBlock(HDR_TRIGCHANNEL + 1))
 	lFile.WriteLine "ScreenBright:" & CStr(DataBlock(HDR_SCREENBRIGHT + 1))
 	lFile.WriteLine "GridBright:" & CStr(DataBlock(HDR_GRIDBRIGHT + 1))
 	lFile.WriteLine "ScrollSpeed:" & Split(SCROLL,",")(DataBlock(HDR_SCROLL + 1))
+	lFile.WriteLine "TRIG50:" & Split(TRIG50,",")(DataBlock(HDR_TRIG50 + 1))
 
 	For Index = 0 to 11
 		lFile.WriteLine "Measure Ch1:" & Split(MEASURES,",")(Index) & " = " & getMeasure(1, Index)
