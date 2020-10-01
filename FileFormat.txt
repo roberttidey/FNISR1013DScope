@@ -31,6 +31,12 @@ Ch1 measurements at 208 - 255 (12 4byte fields)
 Ch2 measurements at 256 - 303 (12 4byte fields)
 
 VMax,VMin,Vavg,Vrms,Vpp,Vp,Freq,Cysle,Time+,Time-,Duty+,Duty-
+Last 2 bytes of 4 byte field give little endian voltages but with a couple of mysteries
+	They need to be multiplied by a fudge factor (0.97) maybe a cal factot somewhere else in header
+	VMin can be negative but I can't see a sign bit yet
+Freq seems to be in Hz
+DOn't yet understand Time+/- or Cycle yet
+
 
 dataBlock1 1500 2 byte fields (little endian) which represent the total captured values. Values range from 0 - 399 where level 200 represents 0 and 50 units represents the scale of the sensitivity.
 dataBlock2 750 2 byte fields (little endian ) which represent the displayed values values. Values are the Y co-ordinates from the top of the screen so they are inverted compared to the buffer values.
