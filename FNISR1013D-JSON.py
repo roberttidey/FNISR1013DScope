@@ -16,7 +16,7 @@ json_indent = 1
 
 voltList = [[5.0,"V",1],[2.5,"V",1],[1.0,"V",1],[500,"mV",0.001],[200,"mV",0.001],[100,"mV",0.001],[50,"mV",0.001]]
 timeList = [[50,"S",1],[20,"S",1],[10,"S",1],[5,"S",1],[2,"S",1],[1,"S",1],[500,"mS",.001],[200,"mS",.001],[100,"mS",.001],[50,"mS",.001],[20,"mS",.001],[10,"mS",.001],[5,"mS",.001],[2,"mS",.001],[1,"mS",.001],[500,"uS",1E-6],[200,"uS",1E-6],[100,"uS",1E-6],[50,"uS",1E-6],[20,"uS",1E-6],[10,"uS",1E-6],[5,"uS",1E-6],[2,"uS",1E-6],[1,"uS",1E-6],[500,"nS",1E-9],[200,"nS",1E-9],[100,"nS",1E-9],[50,"nS",1E-9],[20,"nS",1E-9],[10,"nS",1E-9]]
-measureList = ["Vpp","Vrms","Freq","Time+","Time-","Cycle","Vavg","Vmax","Vmin","Vp","Duty+","Duty-"]
+measureList = ["Vmax","Vmin","Vavg","Vrms","Vpp","Vp","Freq","Cycle","Time+","Time-","Duty+","Duty-"]
 header = [bytes(208)]
 measures = [bytes(48), bytes(48)]
 dataBuff = [bytes(3000), bytes(3000)]
@@ -31,7 +31,7 @@ jsObj = {
   "timebase": {"time":50, "units":"mS/div", "multiplier": 0.001},
   "trigger": {"channel":0,"edge":0,"type":0},
   "settings": {"screenBright":0,"gridBright":0,"scroll":0,"trig50":0},
-  "measures": {"Vpp":[0,0], "Vrms":[0,0], "Freq":[0,0], "Time+":[0,0], "Time-":[0,0], "Cycle":[0,0], "Vavg":[0,0], "Vmax":[0,0], "Vmin":[0,0], "Vp":[0,0], "Duty+":[0,0], "Duty-":[0,0]},
+  "measures": {"Vmax":[0,0], "Vmin":[0,0], "Vavg":[0,0], "Vrms":[0,0], "Vpp":[0,0], "Vp":[0,0], "Freq":[0,0], "Cycle":[0,0], "Time+":[0,0], "Time-":[0,0], "Duty+":[0,0], "Duty-":[0,0]},
   "dataBuffer": [
     {"channel" :"CH1", "units":"mV", "values" : [0 for i in range(1500)]},
     {"channel" :"CH2", "units":"mV", "values" : [0 for i in range(1500)]},
@@ -91,8 +91,22 @@ def parseHeader():
 def getMeasure(ch,mIndex):
 	ad = mIndex * 4
 	mt = measures[ch][ad]
-	mv = (measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+2]
-	return str(mt) + "%" + str(mv)
+	if mIndex < 6:
+		#voltages
+		mv = (measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+3]
+	elif mIndex == 6:
+		#frequency
+		mv = (measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+3]
+	elif mIndex == 7:
+		#cycle
+		mv = (measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+3]
+	elif mIndex < 10:
+		#Time
+		mv = (measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+3]
+	else:
+		#Duty
+		mv = (measures[ch][ad+2] * 256 + measures[ch][ad+3]) / 256
+	return str(mv)
 
 def parseMeasures():
 	for x in range(2):

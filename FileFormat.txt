@@ -30,5 +30,7 @@ Scroll speed at 24 0 - 1 Fast, Slow
 Ch1 measurements at 208 - 255 (12 4byte fields)
 Ch2 measurements at 256 - 303 (12 4byte fields)
 
+VMax,VMin,Vavg,Vrms,Vpp,Vp,Freq,Cysle,Time+,Time-,Duty+,Duty-
+
 dataBlock1 1500 2 byte fields (little endian) which represent the total captured values. Values range from 0 - 399 where level 200 represents 0 and 50 units represents the scale of the sensitivity.
 dataBlock2 750 2 byte fields (little endian ) which represent the displayed values values. Values are the Y co-ordinates from the top of the screen so they are inverted compared to the buffer values.
