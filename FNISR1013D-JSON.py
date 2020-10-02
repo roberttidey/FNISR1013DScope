@@ -93,7 +93,7 @@ def getMeasure(ch,mIndex):
 	mt = measures[ch][ad]
 	if mIndex < 6:
 		#voltages
-		mv = '{0:.2f}'.format(voltCal * (measures[ch][ad+3] * 256 + measures[ch][ad+2]) / 1024)
+		mv = '{0:.2f}'.format((measures[ch][ad+3] * 256 + measures[ch][ad+2]) / 1024)
 	elif mIndex == 6:
 		#frequency
 		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
