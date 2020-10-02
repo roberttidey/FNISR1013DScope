@@ -25,8 +25,6 @@ voltScale = [[5.0,"V",1],[2.5,"V",1]]
 voltProbe = [1,1]
 voltCoupling = ["DC","DC"]
 timeScale = [50,"S",1.0]
-#mystery fudge factor to get measure voltages right
-voltCal = 0.978
 
 jsObj = {
   "voltage": {"volts":[50,50], "units":["mV/div","mv/div"], "multiplier":[0.001,0.001], "probe":[1,1], "coupling":["DC","DC"]},
@@ -95,7 +93,7 @@ def getMeasure(ch,mIndex):
 	mt = measures[ch][ad]
 	if mIndex < 6:
 		#voltages
-		mv = '{0:.2f}'.format(voltCal * (measures[ch][ad+3] * 256 + measures[ch][ad+2]) / 1000)
+		mv = '{0:.2f}'.format(voltCal * (measures[ch][ad+3] * 256 + measures[ch][ad+2]) / 1024)
 	elif mIndex == 6:
 		#frequency
 		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]

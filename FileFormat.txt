@@ -31,8 +31,7 @@ Ch1 measurements at 208 - 255 (12 4byte fields)
 Ch2 measurements at 256 - 303 (12 4byte fields)
 
 VMax,VMin,Vavg,Vrms,Vpp,Vp,Freq,Cysle,Time+,Time-,Duty+,Duty-
-Last 2 bytes of 4 byte field give little endian voltages but with a couple of mysteries
-	They need to be multiplied by a fudge factor (0.97) maybe a cal factot somewhere else in header
+Last 2 bytes of 4 byte field give little endian voltages but with a  mysteries
 	VMin can be negative but I can't see a sign bit yet
 Freq seems to be in Hz
 DOn't yet understand Time+/- or Cycle yet
