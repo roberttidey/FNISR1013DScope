@@ -93,13 +93,13 @@ def getMeasure(ch,mIndex):
 	mt = measures[ch][ad]
 	if mIndex < 6:
 		#voltages
-		mv = '{0:.2f}'.format((measures[ch][ad+3] * 256 + measures[ch][ad+2]) / 1024)
+		mv = '{0:.3f}'.format((measures[ch][ad+3] * 256 + measures[ch][ad+2]) / 1024)
 	elif mIndex == 6:
 		#frequency
 		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
 	elif mIndex < 10:
 		#cycle and time
-		mv = '{0:.3f}'.format(((measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+3]) / 16384)
+		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
 	else:
 		#Duty
 		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
@@ -121,6 +121,8 @@ def parseData():
 
 # Main routine
 filename = input('filename:')
+#if filename.isnumeric():
+#	filename = str(filename)
 getBinaryData(filename + '.wav')
 parseHeader()
 parseMeasures()
