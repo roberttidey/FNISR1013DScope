@@ -97,12 +97,9 @@ def getMeasure(ch,mIndex):
 	elif mIndex == 6:
 		#frequency
 		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
-	elif mIndex == 7:
-		#cycle
-		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
 	elif mIndex < 10:
-		#Time
-		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
+		#cycle and time
+		mv = '{0:.3f}'.format(((measures[ch][ad+1] * 256 + measures[ch][ad+2]) * 256 + measures[ch][ad+3]) / 16384)
 	else:
 		#Duty
 		mv = measures[ch][ad+3] * 256 + measures[ch][ad+2]
