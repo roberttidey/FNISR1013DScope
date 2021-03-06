@@ -296,11 +296,11 @@ Function LogDataBlock(blockTitle, DataStart, DataSize)
 	binAcc.SeekBinary(iFile) = DataStart + 1
 	ReDim DataBlock(DataSize)
 	Index = binAcc.ReadBytes(iFile, DataBlock)
-	blockVal1 = DataBlock(1) + 256 * DataBlock(0)
+	blockVal1 = DataBlock(2) * 256 + DataBlock(1)
 	blockCount = 0
 	blockIndex = 0
 	For Index = 0 To DataSize - 2 Step 2
-		blockVal2 = DataBlock(Index + 1) + 256 * DataBlock(Index + 0)
+		blockVal2 = DataBlock(Index + 2) * 256 + DataBlock(Index + 1)
 		If(Abs(blockVal2 - blockVal1) < 3) Then
 			blockCount = blockCount + 1
 		Else
@@ -325,14 +325,14 @@ Function LogDataVals(blockTitle, DataStart, DataSize, ch)
 	DIm tMult
 	
 	lFile.WriteLine blockTitle & " " & vScale(ch) & vUnits(ch) & "/div " & tScale & tUnits &  "/div"
-	lFile.Write "SampleNum,SampleTime,10 values"
+	lFile.WriteLine "SampleNum,SampleTime,10 values"
 	binAcc.SeekBinary(iFile) = DataStart + 1
 	ReDim DataBlock(DataSize)
 	Index = binAcc.ReadBytes(iFile, DataBlock)
 	vMult = CSng(vScale(ch))
 	tMult = CSng(tScale)
 	For Index = 0 To DataSize - 2 Step 2
-		blockVal = DataBlock(Index + 1) + 256 * DataBlock(Index + 0)
+		blockVal = DataBlock(Index + 2) * 256 + DataBlock(Index + 1)
 		If Index Mod 20  = 0 Then
 			lFile.WriteLine
 			lFile.Write Right("0000" & CStr(Index / 2),4) & "," & CStr(Index / 100 * tMult) & ","
