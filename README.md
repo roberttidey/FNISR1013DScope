@@ -11,4 +11,6 @@ The vbscript file scopedump.vbs is an evolving script that is picking apart the 
 
 The python program FNISR1013D-JSON.py is the target conversion program. To use run it and enter the root wav filename like 1. It produces a JSON file with settings plus buffer and screen data. It seems to produce valid results except for the measures section as the mapping and encoding is still under investigation.
 
+wavoigt has used this data to produce a nice viewer running in Excel
 
+https://github.com/wavoigt/FNIRSI-1013D-WAV-Viewer-in-Excel-VBA
